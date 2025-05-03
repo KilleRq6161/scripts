@@ -6,6 +6,19 @@ local teleportService = game:GetService("TeleportService")
 local luckText = "25x Luck"
 local eggs = {}
 
+-- HUD (Heads-Up Display) ekleme
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player.PlayerGui
+
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(0, 300, 0, 50)  -- Ekranda görülecek boyut
+infoLabel.Position = UDim2.new(0, 10, 0, 10)  -- Ekranın sol üst köşesine yerleştir
+infoLabel.BackgroundTransparency = 1  -- Arkaplanı şeffaf yap
+infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Yazı rengi beyaz
+infoLabel.TextSize = 20  -- Yazı büyüklüğü
+infoLabel.Text = "Yumurtalar aranıyor..."  -- Başlangıç mesajı
+infoLabel.Parent = screenGui
+
 -- Void Egg ve "25x Luck" tabelasının bulunduğu alanı tanımla
 function findEggsWithLuck()
     -- Yumurtaların bulunduğu alanda gezinme
@@ -34,8 +47,16 @@ end
 
 -- Sürekli olarak ışınlanma işlemini gerçekleştiren döngü
 while true do
+    -- HUD'e mesaj yaz
+    infoLabel.Text = "Yumurtalar aranıyor..."
+    
     -- "25x Luck" yazılı yumurtaları bul
     findEggsWithLuck()
+
+    -- Eğer yumurtalar bulunduysa, mesajı güncelle
+    if #eggs > 0 then
+        infoLabel.Text = "Işınlanmaya başlanıyor..."
+    end
 
     -- Her bir "25x Luck" yumurtasına ışınlan
     for _, egg in pairs(eggs) do
@@ -43,5 +64,5 @@ while true do
     end
 
     -- Her 2 saniyede bir tekrar kontrol et
-    wait(2)
+    wait(5)
 end
