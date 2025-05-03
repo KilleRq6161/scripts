@@ -1,68 +1,45 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local teleportService = game:GetService("TeleportService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 
--- 25x Luck'lı Void Egg'lerin listesi
-local luckText = "25x Luck"
-local eggs = {}
-
--- HUD (Heads-Up Display) ekleme
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = player.PlayerGui
-
-local infoLabel = Instance.new("TextLabel")
-infoLabel.Size = UDim2.new(0, 300, 0, 50)  -- Ekranda görülecek boyut
-infoLabel.Position = UDim2.new(0, 10, 0, 10)  -- Ekranın sol üst köşesine yerleştir
-infoLabel.BackgroundTransparency = 1  -- Arkaplanı şeffaf yap
-infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Yazı rengi beyaz
-infoLabel.TextSize = 20  -- Yazı büyüklüğü
-infoLabel.Text = "Yumurtalar aranıyor..."  -- Başlangıç mesajı
-infoLabel.Parent = screenGui
-
--- Void Egg ve "25x Luck" tabelasının bulunduğu alanı tanımla
-function findEggsWithLuck()
-    -- Yumurtaların bulunduğu alanda gezinme
-    for _, egg in pairs(workspace:GetChildren()) do
-        -- Eğer nesne bir Model (yumurta) ise ve içerisinde "BillboardGui" varsa
-        if egg:IsA("Model") and egg:FindFirstChild("BillboardGui") then
-            local billboard = egg:FindFirstChild("BillboardGui")
-            if billboard and billboard:FindFirstChild("TextLabel") then
-                local textLabel = billboard.TextLabel
-                -- Eğer yazı "25x Luck" ise, bu yumurtayı listeye ekle
-                if textLabel.Text == luckText then
-                    table.insert(eggs, egg)  -- Listeye bu yumurtayı ekle
-                end
-            end
+-- Server Hop Fonksiyonu
+function HopServer()
+    local servers = {}
+    local req = request({
+        Url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+    })
+    local body = HttpService:JSONDecode(req.Body)
+    for i, v in pairs(body.data) do
+        if v.playing < v.maxPlayers and v.id ~= game.JobId then
+            table.insert(servers, v.id)
         end
     end
-end
-
--- Işınlanma fonksiyonu
-function teleportToEgg(egg)
-    if egg and egg.PrimaryPart then
-        local eggPosition = egg.PrimaryPart.Position
-        character:SetPrimaryPartCFrame(CFrame.new(eggPosition))
+    if #servers > 0 then
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], game.Players.LocalPlayer)
+    else
+        warn("Uygun sunucu bulunamadı.")
     end
 end
 
--- Sürekli olarak ışınlanma işlemini gerçekleştiren döngü
-while true do
-    -- HUD'e mesaj yaz
-    infoLabel.Text = "Yumurtalar aranıyor..."
-    
-    -- "25x Luck" yazılı yumurtaları bul
-    findEggsWithLuck()
-
-    -- Eğer yumurtalar bulunduysa, mesajı güncelle
-    if #eggs > 0 then
-        infoLabel.Text = "Işınlanmaya başlanıyor..."
-    end
-
-    -- Her bir "25x Luck" yumurtasına ışınlan
-    for _, egg in pairs(eggs) do
-        teleportToEgg(egg)
-    end
-
-    -- Her 2 saniyede bir tekrar kontrol et
-    wait(5)
+-- Ana Script
+if game.PlaceId == 7606602544 then
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/bbccdf75425332848ae0bf6d3068f0c1.lua"))()
+elseif game.PlaceId == 16732694052 or game.PlaceId == 72907489978215 then
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/cba17b913ee63c7bfdbb9301e2d87c8b.lua"))()
+elseif game.PlaceId == 70876832253163 then
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/df969469b8fd0d18b763a0fba7c700a0.lua"))()
+elseif game.PlaceId == 116495829188952 then
+    queue_on_teleport('loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/df969469b8fd0d18b763a0fba7c700a0.lua"))()')
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/df969469b8fd0d18b763a0fba7c700a0.lua"))()
+elseif game.PlaceId == 7606564092 then
+    queue_on_teleport('loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/bbccdf75425332848ae0bf6d3068f0c1.lua"))()')
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/bbccdf75425332848ae0bf6d3068f0c1.lua"))()
+elseif game.PlaceId == 85896571713843 then
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/f5d517c7a5fe691a69c4f0c33c3bc514.lua"))()
+else
+    warn("[Moon X] -> Game not supported.")
 end
+
+-- Örnek: 60 saniyede bir server hop denemesi
+task.delay(60, function()
+    HopServer()
+end)
